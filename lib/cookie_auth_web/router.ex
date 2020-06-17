@@ -9,18 +9,70 @@ defmodule CookieAuthWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :check_auth do
+    plug :auth_verify
+  end
+
+  pipeline :req_auth do
+    plug :require_auth
+  end
+
+  pipeline :req_no_auth do
+    plug :require_no_auth
+  end
+
+  def require_no_auth(conn, _params) do
+    if CookieAuth.Accounts.get_current_user(conn) do
+      conn
+      |> put_flash(:error, "require not auth")
+      |> redirect(to: "/")
+    else
+      conn
+    end
+  end
+
+  def require_auth(conn, _params) do
+    if CookieAuth.Accounts.get_current_user(conn) do
+      conn
+    else
+      conn
+      |> put_flash(:error, "require auth")
+      |> redirect(to: "/")
+    end
+  end
+
+  def auth_verify(conn, _params) do
+    user = CookieAuth.Accounts.get_current_user(conn) 
+    if user do
+      conn
+      |> assign(:current_user, CookieAuth.Accounts.get_current_user(conn))
+    else
+      conn
+    end
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   scope "/", CookieAuthWeb do
-    pipe_through :browser
+    pipe_through [:browser, :check_auth, :req_auth]
+    delete "logout", CookieController, :delete
+    resources "users", UserController, only: [:delete]
+  end
 
-    get "/", PageController, :index
-    resources "users", UserController
+  scope "/", CookieAuthWeb do
+    pipe_through [:browser, :check_auth, :req_no_auth]
     get "login", CookieController, :new
     post "login", CookieController, :create
-    delete "logout", CookieController, :delete
+    resources "users", UserController, only: [:new, :create]
+  end
+
+  scope "/", CookieAuthWeb do
+    pipe_through [:browser, :check_auth]
+
+    get "/", PageController, :index
+    resources "users", UserController, only: [:index]
   end
 
   # Other scopes may use custom stacks.

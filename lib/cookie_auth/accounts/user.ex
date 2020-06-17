@@ -5,8 +5,6 @@ defmodule CookieAuth.Accounts.User do
   schema "users" do
     field :email, :string
     field :password, :string
-    field :role, :string
-    field :username, :string
 
     timestamps()
   end
@@ -14,8 +12,8 @@ defmodule CookieAuth.Accounts.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :email, :password, :role])
-    |> validate_required([:username, :email, :password, :role])
+    |> cast(attrs, [:email, :password])
+    |> validate_required([:email, :password])
     |> put_password_hash()
   end
 

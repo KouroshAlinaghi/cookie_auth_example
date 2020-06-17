@@ -127,10 +127,10 @@ defmodule CookieAuth.Accounts do
     # 2 - CREATE THE AUTH RECORD
     params = %{user_id: id, code: code}
     case create_authentication(params) do
-      {:ok, record} ->
+      {:ok, _record} ->
         # 3 - SAVE CODE TO SESSION
         save_code_in_cookie(conn, code)
-      {:error, msg} ->
+      {:error, _msg} ->
         conn
     end
   end
@@ -147,14 +147,18 @@ defmodule CookieAuth.Accounts do
     |> Repo.insert()
   end
 
-  def user_signed_in?(conn), do: Map.has_key?(conn.cookies, "auth-cookie")
+  def get_current_user(conn) do
+    if Map.has_key?(conn.cookies, "auth-cookie") do
+      code = conn.cookies["auth-cookie"]
+      query = from a in Authentication, where: a.code == ^code
+      auth = query
+             |> Repo.one()
+             |> Repo.preload(:user)
 
-  def get_user_by_code(code) do
-    query = from a in Authentication, where: a.code == ^code
-    auth = query
-    |> Repo.one()
-    |> Repo.preload(:user)
-    auth.user
+      auth.user
+    else
+      nil
+    end
   end
 
   def remove_auth_record(code) do

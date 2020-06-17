@@ -2,7 +2,7 @@ defmodule CookieAuthWeb.CookieController do
   use CookieAuthWeb, :controller
 
   alias CookieAuth.Accounts
-  alias CookieAuth.Accounts.{User, Authentication}
+  alias CookieAuth.Accounts.User
 
   def new(conn, _params) do 
     changeset = Accounts.change_user(%User{})
@@ -27,6 +27,7 @@ defmodule CookieAuthWeb.CookieController do
 
   def delete(conn, _params) do
     Accounts.remove_auth_record(conn.cookies["auth-cookie"])
+
     conn
     |> Accounts.logout()
     |> put_flash(:info, "Loged out successfully.")

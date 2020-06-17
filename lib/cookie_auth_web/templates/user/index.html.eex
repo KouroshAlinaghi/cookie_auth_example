@@ -1,17 +1,8 @@
 <h1>Listing Users</h1>
-<%= if CookieAuth.Accounts.user_signed_in?(@conn) do %>
-  You're Logged In As <%= CookieAuth.Accounts.get_user_by_code(@conn.cookies["auth-cookie"]).username %>
-  <%= link "Logout", to: Routes.cookie_path(@conn, :delete), method: :delete %>
-<% else %>
-  <%= link "Login", to: Routes.cookie_path(@conn, :new) %>
-<% end %>
-<br>
 <table>
   <thead>
     <tr>
-      <th>Username</th>
       <th>Email</th>
-      <th>Role</th>
 
       <th></th>
     </tr>
@@ -19,13 +10,9 @@
   <tbody>
 <%= for user <- @users do %>
     <tr>
-      <td><%= user.username %></td>
       <td><%= user.email %></td>
-      <td><%= user.role %></td>
 
       <td>
-        <span><%= link "Show", to: Routes.user_path(@conn, :show, user) %></span>
-        <span><%= link "Edit", to: Routes.user_path(@conn, :edit, user) %></span>
         <span><%= link "Delete", to: Routes.user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"] %></span>
       </td>
     </tr>

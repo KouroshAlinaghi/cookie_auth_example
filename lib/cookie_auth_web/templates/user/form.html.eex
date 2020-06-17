@@ -5,10 +5,6 @@
     </div>
   <% end %>
 
-  <%= label f, :username %>
-  <%= text_input f, :username %>
-  <%= error_tag f, :username %>
-
   <%= label f, :email %>
   <%= text_input f, :email %>
   <%= error_tag f, :email %>
@@ -16,10 +12,6 @@
   <%= label f, :password %>
   <%= text_input f, :password %>
   <%= error_tag f, :password %>
-
-  <%= label f, :role %>
-  <%= text_input f, :role %>
-  <%= error_tag f, :role %>
 
   <div>
     <%= submit "Save" %>
