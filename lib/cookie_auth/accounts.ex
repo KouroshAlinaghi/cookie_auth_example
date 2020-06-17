@@ -147,12 +147,25 @@ defmodule CookieAuth.Accounts do
     |> Repo.insert()
   end
 
+  def user_signed_in?(conn), do: Map.has_key?(conn.cookies, "auth-cookie")
+
   def get_user_by_code(code) do
     query = from a in Authentication, where: a.code == ^code
     auth = query
     |> Repo.one()
     |> Repo.preload(:user)
     auth.user
+  end
+
+  def remove_auth_record(code) do
+    query = from a in Authentication, where: a.code == ^code
+    query
+    |> Repo.one()
+    |> Repo.delete()
+  end
+
+  def logout(conn) do
+    Plug.Conn.delete_resp_cookie(conn, "auth-cookie")
   end
 
 end

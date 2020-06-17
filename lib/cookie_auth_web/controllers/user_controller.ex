@@ -18,6 +18,7 @@ defmodule CookieAuthWeb.UserController do
     case Accounts.create_user(user_params) do
       {:ok, user} ->
         conn
+        |> Accounts.login(user)
         |> put_flash(:info, "User created successfully.")
         |> redirect(to: Routes.user_path(conn, :show, user))
 
@@ -56,6 +57,7 @@ defmodule CookieAuthWeb.UserController do
     {:ok, _user} = Accounts.delete_user(user)
 
     conn
+    |> Accounts.logout()
     |> put_flash(:info, "User deleted successfully.")
     |> redirect(to: Routes.user_path(conn, :index))
   end

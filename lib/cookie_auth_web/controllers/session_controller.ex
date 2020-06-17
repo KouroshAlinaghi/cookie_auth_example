@@ -26,9 +26,10 @@ defmodule CookieAuthWeb.CookieController do
   end
 
   def delete(conn, _params) do
+    Accounts.remove_auth_record(conn.cookies["auth-cookie"])
     conn
     |> Accounts.logout()
-    |> put_flash(:info, "User deleted successfully.")
+    |> put_flash(:info, "Loged out successfully.")
     |> redirect(to: Routes.user_path(conn, :index))
   end
 
