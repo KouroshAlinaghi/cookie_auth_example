@@ -7,6 +7,19 @@ To start your Phoenix server:
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
+## Structure:
+
+```Users Schema:
+  email: string,
+  password: string
+
+Authentication Schema:
+  user_id: integer,
+  code: string
+```
+
+
+
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
 ## Learn more
