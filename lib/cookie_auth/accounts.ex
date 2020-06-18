@@ -164,8 +164,7 @@ defmodule CookieAuth.Accounts do
   def remove_auth_record(code) do
     query = from a in Authentication, where: a.code == ^code
     query
-    |> Repo.one()
-    |> Repo.delete()
+    |> Repo.delete_all()
   end
 
   def logout(conn) do
