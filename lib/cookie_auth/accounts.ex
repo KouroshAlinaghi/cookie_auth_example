@@ -103,9 +103,11 @@ defmodule CookieAuth.Accounts do
 
   def verify_credentials(email, password) do
     query = from u in User, where: u.email == ^email
+
     case Repo.one(query) do
       nil ->
         {:error, :invalid_credentials}
+
       user ->
         if Argon2.verify_pass(password, user.password) do
           {:ok, user}
@@ -123,13 +125,15 @@ defmodule CookieAuth.Accounts do
 
   def login(conn, %User{id: id}) do
     # 1 - GENERATE A CODE
-    code = :crypto.strong_rand_bytes(32) |> Base.encode64 |> binary_part(0, 32)
+    code = :crypto.strong_rand_bytes(32) |> Base.encode64() |> binary_part(0, 32)
     # 2 - CREATE THE AUTH RECORD
     params = %{user_id: id, code: code}
+
     case create_authentication(params) do
       {:ok, _record} ->
-        # 3 - SAVE CODE TO SESSION
+        # 3 - SAVE CODE TO COOKIE
         save_code_in_cookie(conn, code)
+
       {:error, _msg} ->
         conn
     end
@@ -151,9 +155,11 @@ defmodule CookieAuth.Accounts do
     if Map.has_key?(conn.cookies, "auth-cookie") do
       code = conn.cookies["auth-cookie"]
       query = from a in Authentication, where: a.code == ^code
-      auth = query
-             |> Repo.one()
-             |> Repo.preload(:user)
+
+      auth =
+        query
+        |> Repo.one()
+        |> Repo.preload(:user)
 
       auth.user
     else
@@ -163,6 +169,7 @@ defmodule CookieAuth.Accounts do
 
   def remove_auth_record(code) do
     query = from a in Authentication, where: a.code == ^code
+
     query
     |> Repo.delete_all()
   end
@@ -170,5 +177,4 @@ defmodule CookieAuth.Accounts do
   def logout(conn) do
     Plug.Conn.delete_resp_cookie(conn, "auth-cookie")
   end
-
 end

@@ -42,7 +42,8 @@ defmodule CookieAuthWeb.Router do
   end
 
   def auth_verify(conn, _params) do
-    user = CookieAuth.Accounts.get_current_user(conn) 
+    user = CookieAuth.Accounts.get_current_user(conn)
+
     if user do
       conn
       |> assign(:current_user, CookieAuth.Accounts.get_current_user(conn))

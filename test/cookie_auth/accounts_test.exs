@@ -6,8 +6,18 @@ defmodule CookieAuth.AccountsTest do
   describe "users" do
     alias CookieAuth.Accounts.User
 
-    @valid_attrs %{email: "some email", password: "some password", role: "some role", username: "some username"}
-    @update_attrs %{email: "some updated email", password: "some updated password", role: "some updated role", username: "some updated username"}
+    @valid_attrs %{
+      email: "some email",
+      password: "some password",
+      role: "some role",
+      username: "some username"
+    }
+    @update_attrs %{
+      email: "some updated email",
+      password: "some updated password",
+      role: "some updated role",
+      username: "some updated username"
+    }
     @invalid_attrs %{email: nil, password: nil, role: nil, username: nil}
 
     def user_fixture(attrs \\ %{}) do

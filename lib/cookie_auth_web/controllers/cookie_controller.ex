@@ -4,7 +4,7 @@ defmodule CookieAuthWeb.CookieController do
   alias CookieAuth.Accounts
   alias CookieAuth.Accounts.User
 
-  def new(conn, _params) do 
+  def new(conn, _params) do
     changeset = Accounts.change_user(%User{})
     render(conn, "new.html", changeset: changeset, action: Routes.cookie_path(conn, :create))
   end
@@ -19,6 +19,7 @@ defmodule CookieAuthWeb.CookieController do
 
       {:error, _} ->
         changeset = Accounts.change_user(%User{})
+
         conn
         |> put_flash(:error, "Credentials Are Not Valid.")
         |> render("new.html", changeset: changeset, action: Routes.cookie_path(conn, :create))
@@ -33,5 +34,4 @@ defmodule CookieAuthWeb.CookieController do
     |> put_flash(:info, "Loged out successfully.")
     |> redirect(to: Routes.user_path(conn, :index))
   end
-
 end
