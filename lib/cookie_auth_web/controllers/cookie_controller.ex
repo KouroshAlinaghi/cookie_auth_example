@@ -27,7 +27,7 @@ defmodule CookieAuthWeb.CookieController do
   end
 
   def delete(conn, _params) do
-    Accounts.remove_auth_record(conn.cookies["auth-cookie"])
+    Accounts.set_active_to_false(conn.cookies["auth-cookie"])
 
     conn
     |> Accounts.logout()

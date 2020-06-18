@@ -6,6 +6,9 @@ defmodule CookieAuth.Accounts.Authentication do
 
   schema "authentications" do
     field :code, :string
+    field :ip, :string
+    field :useragent, :string
+    field :active, :boolean
     belongs_to :user, User
 
     timestamps()
@@ -14,7 +17,7 @@ defmodule CookieAuth.Accounts.Authentication do
   @doc false
   def changeset(authentication, attrs) do
     authentication
-    |> cast(attrs, [:code, :user_id])
-    |> validate_required([:code, :user_id])
+    |> cast(attrs, [:code, :user_id, :ip, :useragent])
+    |> validate_required([:code, :user_id, :ip, :useragent])
   end
 end

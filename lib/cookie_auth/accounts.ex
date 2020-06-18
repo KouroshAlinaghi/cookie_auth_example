@@ -117,17 +117,48 @@ defmodule CookieAuth.Accounts do
     end
   end
 
+  @expire_time_in_seconds 60*60*24*30*12
+
+  def validate_time(conn, auth) do
+    expire_date = auth.inserted_at |> NaiveDateTime.add(@expire_time_in_seconds)
+    NaiveDateTime.compare(expire_date, NaiveDateTime.utc_now()) == :gt
+  end
+
+  def verify_auth(conn) do
+    if Map.has_key?(conn.cookies, "auth-cookie") do
+      query = from a in Authentication, where: a.code == ^conn.cookies["auth-cookie"]
+      auth = Repo.one(query) |> Repo.preload(:user)
+
+      if auth && auth.active && auth.ip == get_ip(conn) && auth.useragent == get_useragent(conn) && validate_time(conn, auth) do
+        {:ok, auth.user}
+      else
+        {:error, "token is not valid."}
+      end
+    else
+      {:error, "auth-cookie is not set."}
+    end
+  end
+
   def save_code_in_cookie(conn, code) do
     conn
-    |> Plug.Conn.put_resp_cookie("auth-cookie", code)
+    |> Plug.Conn.put_resp_cookie("auth-cookie", code, max_age: @expire_time_in_seconds)
     |> Plug.Conn.fetch_cookies()
+  end
+
+  def get_useragent(%Plug.Conn{req_headers: headers}) do
+    {"user-agent", useragent} = Enum.find(headers, fn x -> x |> Tuple.to_list() |> List.first() == "user-agent" end)
+    useragent
+  end
+
+  def get_ip(%Plug.Conn{remote_ip: ip}) do
+    ip |> :inet_parse.ntoa |> to_string()
   end
 
   def login(conn, %User{id: id}) do
     # 1 - GENERATE A CODE
     code = :crypto.strong_rand_bytes(32) |> Base.encode64() |> binary_part(0, 32)
     # 2 - CREATE THE AUTH RECORD
-    params = %{user_id: id, code: code}
+    params = %{user_id: id, code: code, useragent: get_useragent(conn), ip: get_ip(conn)}
 
     case create_authentication(params) do
       {:ok, _record} ->
@@ -151,27 +182,12 @@ defmodule CookieAuth.Accounts do
     |> Repo.insert()
   end
 
-  def get_current_user(conn) do
-    if Map.has_key?(conn.cookies, "auth-cookie") do
-      code = conn.cookies["auth-cookie"]
-      query = from a in Authentication, where: a.code == ^code
-
-      auth =
-        query
-        |> Repo.one()
-        |> Repo.preload(:user)
-
-      auth.user
-    else
-      nil
-    end
-  end
-
-  def remove_auth_record(code) do
+  def set_active_to_false(code) do
     query = from a in Authentication, where: a.code == ^code
+    auth = Repo.one(query)
+    auth = Ecto.Changeset.change auth, active: false
 
-    query
-    |> Repo.delete_all()
+    Repo.update auth
   end
 
   def logout(conn) do

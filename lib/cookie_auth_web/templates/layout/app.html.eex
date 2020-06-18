@@ -23,12 +23,16 @@
           <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
         </a>
       </section>
-      <%= if CookieAuth.Accounts.get_current_user(@conn) do %>
+      <% IO.inspect @conn.assigns %>
+      <%= if @conn.assigns.user_signed_in? do %>
         You're Logged In As <%= @conn.assigns.current_user.email %> 
         <%= link "Logout", to: Routes.cookie_path(@conn, :delete), method: :delete %>
       <% else %>
         <%= link "Login", to: Routes.cookie_path(@conn, :new) %>
       <% end %>
+      <br>
+      Your IP: <%= CookieAuth.Accounts.get_ip(@conn) %><br>
+      Useragent: <%= CookieAuth.Accounts.get_useragent(@conn) %>
     </header>
     <main role="main" class="container">
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
