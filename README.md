@@ -18,7 +18,6 @@ Authentication Schema:
   user_id: integer,
   code: string,
   active: boolean,
-  ip: string,
   useragent: string
 ```
 
