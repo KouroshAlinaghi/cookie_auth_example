@@ -55,24 +55,6 @@ defmodule CookieAuth.Accounts do
   end
 
   @doc """
-  Updates a user.
-
-  ## Examples
-
-      iex> update_user(user, %{field: new_value})
-      {:ok, %User{}}
-
-      iex> update_user(user, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_user(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
   Deletes a user.
 
   ## Examples
@@ -125,23 +107,24 @@ defmodule CookieAuth.Accounts do
   end
 
   def verify_auth(conn) do
-    if Map.has_key?(conn.cookies, "auth-cookie") do
-      query = from a in Authentication, where: a.code == ^conn.cookies["auth-cookie"]
+    if Map.has_key?(conn.cookies, "TOKEN") do
+      query = from a in Authentication, where: a.code == ^conn.cookies["TOKEN"]
       auth = Repo.one(query) |> Repo.preload(:user)
 
-      if auth && auth.active && auth.ip == get_ip(conn) && auth.useragent == get_useragent(conn) && validate_time(conn, auth) do
+      IO.inspect auth
+      if auth && auth.active && auth.useragent == get_useragent(conn) && validate_time(conn, auth) do
         {:ok, auth.user}
       else
         {:error, "token is not valid."}
       end
     else
-      {:error, "auth-cookie is not set."}
+      {:error, "TOKEN is not set."}
     end
   end
 
   def save_code_in_cookie(conn, code) do
     conn
-    |> Plug.Conn.put_resp_cookie("auth-cookie", code, max_age: @expire_time_in_seconds)
+    |> Plug.Conn.put_resp_cookie("TOKEN", code, max_age: @expire_time_in_seconds, http_only: true)
     |> Plug.Conn.fetch_cookies()
   end
 
@@ -150,15 +133,11 @@ defmodule CookieAuth.Accounts do
     useragent
   end
 
-  def get_ip(%Plug.Conn{remote_ip: ip}) do
-    ip |> :inet_parse.ntoa |> to_string()
-  end
-
   def login(conn, %User{id: id}) do
     # 1 - GENERATE A CODE
-    code = :crypto.strong_rand_bytes(32) |> Base.encode64() |> binary_part(0, 32)
+    code = :crypto.strong_rand_bytes(64) |> Base.encode64() |> binary_part(0, 64)
     # 2 - CREATE THE AUTH RECORD
-    params = %{user_id: id, code: code, useragent: get_useragent(conn), ip: get_ip(conn)}
+    params = %{user_id: id, code: code, useragent: get_useragent(conn)}
 
     case create_authentication(params) do
       {:ok, _record} ->
@@ -191,6 +170,13 @@ defmodule CookieAuth.Accounts do
   end
 
   def logout(conn) do
-    Plug.Conn.delete_resp_cookie(conn, "auth-cookie")
+    Plug.Conn.delete_resp_cookie(conn, "TOKEN")
   end
+
+  def list_active_sessions(%User{id: id}) do
+    query = from a in Authentication, where: a.user_id == ^id and a.active, select: a
+    Repo.all(query)
+  end
+
+  def get_session!(id), do: Repo.get!(Authentication, id)
 end

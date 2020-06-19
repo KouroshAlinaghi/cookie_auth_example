@@ -24,14 +24,15 @@
         </a>
       </section>
       <% IO.inspect @conn.assigns %>
-      <%= if @conn.assigns.user_signed_in? do %>
+      <%= link "Listing Users", to: Routes.user_path(@conn, :index) %><br>
+      <%= if @conn.assigns.user_signed_in do %>
         You're Logged In As <%= @conn.assigns.current_user.email %> 
-        <%= link "Logout", to: Routes.cookie_path(@conn, :delete), method: :delete %>
+        <%= link "Logout", to: Routes.cookie_path(@conn, :delete), method: :delete %><br>
+        <%= link "Manage Your Available Sessions", to: Routes.cookie_path(@conn, :index) %>
       <% else %>
         <%= link "Login", to: Routes.cookie_path(@conn, :new) %>
       <% end %>
       <br>
-      Your IP: <%= CookieAuth.Accounts.get_ip(@conn) %><br>
       Useragent: <%= CookieAuth.Accounts.get_useragent(@conn) %>
     </header>
     <main role="main" class="container">

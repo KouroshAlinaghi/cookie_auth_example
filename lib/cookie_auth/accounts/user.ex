@@ -14,6 +14,8 @@ defmodule CookieAuth.Accounts.User do
     user
     |> cast(attrs, [:email, :password])
     |> validate_required([:email, :password])
+    |> validate_length(:password, min: 6)
+    |> validate_format(:email, ~r/@/)
     |> put_password_hash()
   end
 

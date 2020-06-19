@@ -1,0 +1,29 @@
+<h1>Listing Active Sessions</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Useragent</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for session <- @user_sessions do %>
+    <tr>
+      <td><%= session.code %></td>
+      <td><%= session.useragent %></td>
+
+      <td>
+        <%= if session.code != @conn.cookies["TOKEN"] do %>
+          <span><%= link "Delete", to: Routes.cookie_path(@conn, :delete_session, session), method: :delete, data: [confirm: "Are you sure?"] %></span>
+        <% else %>
+          <span><%= link "Logout", to: Routes.cookie_path(@conn, :delete), method: :delete, data: [confirm: "Are you sure?"] %></span>
+        <% end %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "Listing Users", to: Routes.user_path(@conn, :index) %></span>

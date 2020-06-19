@@ -4,6 +4,11 @@ defmodule CookieAuthWeb.CookieController do
   alias CookieAuth.Accounts
   alias CookieAuth.Accounts.User
 
+  def index(conn, _params) do
+    user_sessions = Accounts.list_active_sessions(conn.assigns.current_user)
+    render(conn, "index.html", user_sessions: user_sessions)
+  end
+
   def new(conn, _params) do
     changeset = Accounts.change_user(%User{})
     render(conn, "new.html", changeset: changeset, action: Routes.cookie_path(conn, :create))
@@ -26,8 +31,17 @@ defmodule CookieAuthWeb.CookieController do
     end
   end
 
+  def delete_session(conn, %{"id" => id}) do
+    session = Accounts.get_session!(id)
+    Accounts.set_active_to_false(session.code)
+
+    conn
+    |> put_flash(:info, "Session Unactived Successfully/")
+    |> redirect(to: Routes.cookie_path(conn, :index))
+  end
+
   def delete(conn, _params) do
-    Accounts.set_active_to_false(conn.cookies["auth-cookie"])
+    Accounts.set_active_to_false(conn.cookies["TOKEN"])
 
     conn
     |> Accounts.logout()

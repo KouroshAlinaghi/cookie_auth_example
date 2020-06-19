@@ -46,10 +46,10 @@ defmodule CookieAuthWeb.Router do
       {:ok, user} ->
         conn
         |> assign(:current_user, user)
-        |> assign(:user_signed_in?, true)
+        |> assign(:user_signed_in, true)
       {:error, _} ->
         conn
-        |> assign(:user_signed_in?, false)
+        |> assign(:user_signed_in, false)
     end
   end
 
@@ -60,6 +60,8 @@ defmodule CookieAuthWeb.Router do
   scope "/", CookieAuthWeb do
     pipe_through [:browser, :check_auth, :req_auth]
     delete "logout", CookieController, :delete
+    get "sessions", CookieController, :index
+    delete "sessions/delete/:id", CookieController, :delete_session
     resources "users", UserController, only: [:delete]
   end
 
