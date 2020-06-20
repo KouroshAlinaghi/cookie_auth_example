@@ -111,11 +111,10 @@ defmodule CookieAuth.Accounts do
       query = from a in Authentication, where: a.code == ^conn.cookies["TOKEN"]
       auth = Repo.one(query) |> Repo.preload(:user)
 
-      IO.inspect auth
       if auth && auth.active && auth.useragent == get_useragent(conn) && validate_time(conn, auth) do
         {:ok, auth.user}
       else
-        {:error, "token is not valid."}
+        {:error, :invalid_token}
       end
     else
       {:error, "TOKEN is not set."}

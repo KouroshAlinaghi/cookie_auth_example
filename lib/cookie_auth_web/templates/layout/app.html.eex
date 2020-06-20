@@ -23,7 +23,6 @@
           <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
         </a>
       </section>
-      <% IO.inspect @conn.assigns %>
       <%= link "Listing Users", to: Routes.user_path(@conn, :index) %><br>
       <%= if @conn.assigns.user_signed_in do %>
         You're Logged In As <%= @conn.assigns.current_user.email %> 

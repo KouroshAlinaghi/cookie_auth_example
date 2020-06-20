@@ -47,6 +47,10 @@ defmodule CookieAuthWeb.Router do
         conn
         |> assign(:current_user, user)
         |> assign(:user_signed_in, true)
+      {:error, :invalid_token} ->
+        conn
+        |> CookieAuth.Accounts.logout()
+        |> assign(:user_signed_in, false)
       {:error, _} ->
         conn
         |> assign(:user_signed_in, false)
