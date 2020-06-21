@@ -22,7 +22,7 @@ defmodule CookieAuthWeb.Router do
   end
 
   def require_no_auth(conn, _params) do
-    if Map.has_key?(conn.assigns, :current_user) do
+    if CookieAuth.Accounts.user_signed_in?(conn) do
       conn
       |> put_flash(:error, "require not auth")
       |> redirect(to: "/")
@@ -32,7 +32,7 @@ defmodule CookieAuthWeb.Router do
   end
 
   def require_auth(conn, _params) do
-    if Map.has_key?(conn.assigns, :current_user) do
+    if CookieAuth.Accounts.user_signed_in?(conn) do
       conn
     else
       conn

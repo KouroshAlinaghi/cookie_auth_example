@@ -24,7 +24,7 @@
         </a>
       </section>
       <%= link "Listing Users", to: Routes.user_path(@conn, :index) %><br>
-      <%= if @conn.assigns.user_signed_in do %>
+      <%= if CookieAuth.Accounts.user_signed_in?(@conn) do %>
         You're Logged In As <%= @conn.assigns.current_user.email %> 
         <%= link "Logout", to: Routes.cookie_path(@conn, :delete), method: :delete %><br>
         <%= link "Manage Your Available Sessions", to: Routes.cookie_path(@conn, :index) %>
@@ -32,7 +32,6 @@
         <%= link "Login", to: Routes.cookie_path(@conn, :new) %>
       <% end %>
       <br>
-      Useragent: <%= CookieAuth.Accounts.get_useragent(@conn) %>
     </header>
     <main role="main" class="container">
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
